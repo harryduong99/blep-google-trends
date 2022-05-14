@@ -24,6 +24,8 @@ const (
 func GetInterestOverTimeByMinute(listKeywords []string, storeDBOption bool, isFirstTime bool) {
 	log.Println("Explore Search by minute:")
 	for _, keyword := range listKeywords {
+		log.Println("Explore trends for keyword:", keyword)
+
 		overTimeHour := fetching(keyword, storeDBOption, "now 7-d")
 		overTime := fetching(keyword, storeDBOption, "now 4-H")
 		resultHour := handleItems(overTimeHour)
@@ -32,16 +34,16 @@ func GetInterestOverTimeByMinute(listKeywords []string, storeDBOption bool, isFi
 		if !isFirstTime {
 			resultMinute = calculate(resultHour, resultMinute)
 		}
-		printResult(resultMinute)
+		printResult(keyword, resultMinute)
 		if storeDBOption {
 			storeData(keyword, resultMinute)
 		}
 	}
 }
 
-func printResult(resultMinute map[string]int) {
+func printResult(keyword string, resultMinute map[string]int) {
 	for time, value := range resultMinute {
-		fmt.Printf("%#v => %#v \n", time, value)
+		fmt.Printf("%v: %#v => %#v \n", keyword, time, value)
 	}
 
 }
@@ -70,7 +72,6 @@ func GetInterestOverTimeByHour(listKeywords []string) {
 func fetching(keyword string, storeDBOption bool, timeRange string) []*gogtrends.Timeline {
 	ctx := context.Background()
 
-	log.Println("Explore trends for keyword:", keyword)
 	// get widgets for Golang keyword in programming category
 	explore, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
 		ComparisonItems: []*gogtrends.ComparisonItem{
